@@ -171,21 +171,23 @@ export default function Album() {
                   <div key={group} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                     <button
                       onClick={() => toggleGroup(group)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                      className="w-full grid items-center px-4 py-3"
+                      style={{ gridTemplateColumns: 'auto 1fr auto' }}
                     >
-                      <span className="font-semibold text-gray-800 text-sm w-16 shrink-0">Grupo {group}</span>
-                      <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-gray-800 text-sm">Grupo {group}</span>
+                      <div className="flex items-center justify-center gap-1.5">
                         {list.map((team) => (
                           <FlagIcon key={team.id} teamId={team.id} />
                         ))}
                       </div>
-                      <div className="flex-1" />
-                      <span className="text-xs text-gray-400 shrink-0 mr-2">
-                        {list.reduce((s, t) => s + t.collected, 0)}/{list.reduce((s, t) => s + t.total, 0)}
-                      </span>
-                      <span className="text-gray-400 shrink-0">
-                        <Chevron open={isOpen} />
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">
+                          {list.reduce((s, t) => s + t.collected, 0)}/{list.reduce((s, t) => s + t.total, 0)}
+                        </span>
+                        <span className="text-gray-400">
+                          <Chevron open={isOpen} />
+                        </span>
+                      </div>
                     </button>
 
                     {isOpen && (
