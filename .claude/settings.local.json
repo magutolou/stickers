@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git *)",
+      "WebFetch(domain:www.cnnbrasil.com.br)",
+      "Read(//tmp/**)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s 'https://ktxxlkqntcsitcvhbmah.supabase.co/rest/v1/teams?select=count&limit=1' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0eHhsa3FudGNzaXRjdmhibWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MTcxOTAsImV4cCI6MjA5Mzk5MzE5MH0.fOWrhV9WK-OwSpEM9H8O29NZs5uZojkEBvg8L_bec1g' -H 'Prefer: count=exact' -I)",
+      "Bash(curl -s 'https://ktxxlkqntcsitcvhbmah.supabase.co/rest/v1/stickers?select=count&limit=1' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0eHhsa3FudGNzaXRjdmhibWFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MTcxOTAsImV4cCI6MjA5Mzk5MzE5MH0.fOWrhV9WK-OwSpEM9H8O29NZs5uZojkEBvg8L_bec1g' -H 'Prefer: count=exact' -I)",
+      "Bash(gh auth *)",
+      "WebFetch(domain:stickers-theta.vercel.app)"
+    ]
+  }
+}

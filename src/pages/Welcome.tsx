@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useAuth } from '../App'
-import { createCollection, resolveToken, saveAuthState } from '../lib/auth'
+import { createCollection, resolveToken, saveAuthState, type AuthState } from '../lib/auth'
 
 export default function Welcome() {
   const { setAuth } = useAuth()
   const [mode, setMode] = useState<'menu' | 'create' | 'enter'>('menu')
   const [links, setLinks] = useState<{ ownerLink: string; partnerLink: string } | null>(null)
+  const [pendingAuth, setPendingAuth] = useState<AuthState | null>(null)
+  const [copied, setCopied] = useState(false)
   const [tokenInput, setTokenInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -15,19 +17,29 @@ export default function Welcome() {
     setError('')
     try {
       const result = await createCollection()
-      setLinks(result)
-      setMode('create')
       const token = new URL(result.ownerLink).searchParams.get('token')!
       const resolved = await resolveToken(token)
       if (resolved) {
         saveAuthState(resolved)
-        setAuth(resolved)
+        setPendingAuth(resolved)
+        setLinks(result)
+        setMode('create')
       }
     } catch {
       setError('Erro ao criar coleção. Verifique sua conexão.')
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleCopy() {
+    if (!links) return
+    navigator.clipboard.writeText(links.partnerLink)
+    setCopied(true)
+  }
+
+  function handleEnterApp() {
+    if (pendingAuth) setAuth(pendingAuth)
   }
 
   async function handleEnter() {
@@ -84,18 +96,24 @@ export default function Welcome() {
           <div className="space-y-4">
             <h2 className="font-bold text-lg text-center">Coleção criada! 🎉</h2>
             <p className="text-sm text-gray-600 text-center">
-              Você já está logado. Salve o link do seu irmão e envie para ele.
+              Copie o link do seu irmão e envie para ele antes de entrar.
             </p>
             <div className="bg-blue-50 rounded-xl p-3">
               <p className="text-xs text-blue-600 font-semibold mb-1">Link do irmão:</p>
               <p className="text-xs break-all text-gray-700">{links.partnerLink}</p>
               <button
-                onClick={() => navigator.clipboard.writeText(links.partnerLink)}
+                onClick={handleCopy}
                 className="mt-2 w-full text-xs bg-blue-600 text-white py-1.5 rounded-lg"
               >
-                Copiar link
+                {copied ? '✓ Copiado!' : 'Copiar link'}
               </button>
             </div>
+            <button
+              onClick={handleEnterApp}
+              className="w-full bg-green-700 text-white py-3 rounded-xl font-semibold text-base"
+            >
+              Entrar no álbum →
+            </button>
           </div>
         )}
 
