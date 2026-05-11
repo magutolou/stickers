@@ -174,11 +174,12 @@ export default function Album() {
                       className="w-full flex items-center gap-3 px-4 py-3 text-left"
                     >
                       <span className="font-semibold text-gray-800 text-sm w-16 shrink-0">Grupo {group}</span>
-                      <div className="flex-1 flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5">
                         {list.map((team) => (
                           <FlagIcon key={team.id} teamId={team.id} />
                         ))}
                       </div>
+                      <div className="flex-1" />
                       <span className="text-xs text-gray-400 shrink-0 mr-2">
                         {list.reduce((s, t) => s + t.collected, 0)}/{list.reduce((s, t) => s + t.total, 0)}
                       </span>
