@@ -33,7 +33,7 @@ const ISO_CODE: Record<string, string> = {
 function FlagIcon({ teamId }: { teamId: string }) {
   const iso = ISO_CODE[teamId]
   if (!iso) return <span>{FLAG_EMOJI[teamId] || '🏳️'}</span>
-  return <span className={`fi fi-${iso}`} style={{ fontSize: '1.25rem', borderRadius: '2px' }} />
+  return <span className={`fi fi-${iso}`} style={{ fontSize: '0.9rem', borderRadius: '3px', boxShadow: '0 0 0 1px rgba(0,0,0,0.08)' }} />
 }
 
 function Chevron({ open }: { open: boolean }) {
@@ -179,6 +179,9 @@ export default function Album() {
                           <FlagIcon key={team.id} teamId={team.id} />
                         ))}
                       </div>
+                      <span className="text-xs text-gray-400 shrink-0 mr-2">
+                        {list.reduce((s, t) => s + t.collected, 0)}/{list.reduce((s, t) => s + t.total, 0)}
+                      </span>
                       <span className="text-gray-400 shrink-0">
                         <Chevron open={isOpen} />
                       </span>
