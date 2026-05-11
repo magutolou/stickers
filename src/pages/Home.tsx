@@ -28,7 +28,10 @@ export default function Home() {
       if (error || !data) return
 
       const collected = data.filter((s) => s.quantity_me > 0 || s.quantity_brother > 0).length
-      const duplicates = data.filter((s) => s.quantity_me + s.quantity_brother > 1).length
+      const duplicates = data.reduce((acc, s) => {
+        const total = s.quantity_me + s.quantity_brother
+        return acc + (total > 1 ? total - 1 : 0)
+      }, 0)
       setStats({ collected, duplicates, missing: TOTAL_STICKERS - collected })
     }
 
