@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
+import { calcExtras } from '../lib/extras'
 
 const TOTAL_STICKERS = 980
 
@@ -29,8 +30,8 @@ export default function Home() {
 
       const collected = data.filter((s) => s.quantity_me > 0 || s.quantity_brother > 0).length
       const duplicates = data.reduce((acc, s) => {
-        const total = s.quantity_me + s.quantity_brother
-        return acc + (total > 1 ? total - 1 : 0)
+        const { extrasMe, extrasBro } = calcExtras(s.quantity_me, s.quantity_brother)
+        return acc + extrasMe + extrasBro
       }, 0)
       setStats({ collected, duplicates, missing: TOTAL_STICKERS - collected })
     }

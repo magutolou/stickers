@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
+import { calcExtras } from '../lib/extras'
 import type { StickerWithStatus } from '../lib/types'
 
 type TradeFilter = 'all' | 'mine' | 'brother'
@@ -39,7 +40,10 @@ export default function Trades() {
           team_name: cs.stickers?.teams?.name,
           team_group: cs.stickers?.teams?.group,
         }))
-        .filter((s: StickerWithTeam) => (s.quantity_me ?? 0) + (s.quantity_brother ?? 0) > 1)
+        .filter((s: StickerWithTeam) => {
+          const { extrasMe, extrasBro } = calcExtras(s.quantity_me ?? 0, s.quantity_brother ?? 0)
+          return extrasMe + extrasBro > 0
+        })
       setItems(merged)
       setLoading(false)
     }
@@ -78,8 +82,9 @@ export default function Trades() {
   }
 
   const filtered = items.filter((s) => {
-    if (filter === 'mine' && !((s.quantity_me ?? 0) > 0)) return false
-    if (filter === 'brother' && !((s.quantity_brother ?? 0) > 0)) return false
+    const { extrasMe, extrasBro } = calcExtras(s.quantity_me ?? 0, s.quantity_brother ?? 0)
+    if (filter === 'mine' && extrasMe === 0) return false
+    if (filter === 'brother' && extrasBro === 0) return false
     if (selectedGroup && s.team_group !== selectedGroup) return false
     if (selectedTeam && s.team_id !== selectedTeam) return false
     return true
@@ -156,8 +161,7 @@ export default function Trades() {
       ) : (
         <div className="px-4 space-y-2 pb-6 mt-2">
           {filtered.map((s) => {
-            const excessMe = Math.max(0, (s.quantity_me ?? 0) - 1)
-            const excessBro = Math.max(0, (s.quantity_brother ?? 0) - 1)
+            const { extrasMe: excessMe, extrasBro: excessBro } = calcExtras(s.quantity_me ?? 0, s.quantity_brother ?? 0)
             return (
               <div key={s.id} className="bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-3 shadow-sm">
                 <span className="font-mono text-xs bg-gray-100 rounded px-2 py-1 text-gray-600 flex-shrink-0">

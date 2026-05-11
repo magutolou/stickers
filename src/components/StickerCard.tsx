@@ -1,4 +1,5 @@
 import type { StickerWithStatus } from '../lib/types'
+import { calcExtras } from '../lib/extras'
 
 interface Props {
   sticker: StickerWithStatus
@@ -20,7 +21,8 @@ export default function StickerCard({ sticker, onClick }: Props) {
   const { card, text } = getStyle(sticker)
   const me = sticker.quantity_me ?? 0
   const bro = sticker.quantity_brother ?? 0
-  const badge = Math.max(0, me + bro - 1)
+  const { extrasMe, extrasBro } = calcExtras(me, bro)
+  const badge = extrasMe + extrasBro
 
   return (
     <button

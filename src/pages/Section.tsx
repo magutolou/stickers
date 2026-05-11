@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
+import { calcExtras } from '../lib/extras'
 import StickerCard from '../components/StickerCard'
 import StickerModal from '../components/StickerModal'
 import type { StickerWithStatus, StickerFilter, Team } from '../lib/types'
@@ -76,7 +77,10 @@ export default function Section() {
     switch (filter) {
       case 'mine':       return list.filter((s) => (s.quantity_me ?? 0) > 0)
       case 'brother':    return list.filter((s) => (s.quantity_brother ?? 0) > 0)
-      case 'duplicates': return list.filter((s) => (s.quantity_me ?? 0) + (s.quantity_brother ?? 0) > 1)
+      case 'duplicates': return list.filter((s) => {
+        const { extrasMe, extrasBro } = calcExtras(s.quantity_me ?? 0, s.quantity_brother ?? 0)
+        return extrasMe + extrasBro > 0
+      })
       default:           return list
     }
   }
