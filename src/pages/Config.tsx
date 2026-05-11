@@ -1,10 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../App'
 import { clearAuthState } from '../lib/auth'
+import { supabase } from '../lib/supabase'
 
 export default function Config() {
   const { auth, setAuth } = useAuth()
   const [copied, setCopied] = useState<'mine' | 'partner' | null>(null)
+  const [partnerLink, setPartnerLink] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!auth) return
+    supabase
+      .from('collections')
+      .select('owner_token, partner_token')
+      .eq('id', auth.collectionId)
+      .single()
+      .then(({ data }) => {
+        if (!data) return
+        const partnerToken = auth.role === 'owner' ? data.partner_token : data.owner_token
+        setPartnerLink(`${window.location.origin}/?token=${partnerToken}`)
+      })
+  }, [auth])
 
   if (!auth) return null
 
@@ -47,16 +63,29 @@ export default function Config() {
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center text-white text-xs font-bold">
-              IR
+        <div>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Link do irmão</p>
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center text-white text-xs font-bold">
+                IR
+              </div>
+              <span className="font-semibold text-gray-800">Irmão</span>
             </div>
-            <span className="font-semibold text-gray-800">Irmão</span>
+            {partnerLink ? (
+              <>
+                <p className="text-xs text-gray-500 break-all mb-3">{partnerLink}</p>
+                <button
+                  onClick={() => copyLink(partnerLink, 'partner')}
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold"
+                >
+                  {copied === 'partner' ? '✅ Copiado!' : '📋 Copiar link do irmão'}
+                </button>
+              </>
+            ) : (
+              <p className="text-xs text-gray-400">Carregando...</p>
+            )}
           </div>
-          <p className="text-sm text-gray-600">
-            Você não tem o link do irmão aqui. Peça para ele acessar a tela de Config e compartilhar o link dele com você.
-          </p>
         </div>
 
         <div className="pt-4 border-t border-gray-200">
