@@ -24,6 +24,8 @@ export default function Config() {
 
   if (!auth) return null
 
+  const partnerName = auth.role === 'owner' ? 'Gabriel' : 'Maguto'
+  const myName = auth.role === 'owner' ? 'Maguto' : 'Gabriel'
   const myLink = `${window.location.origin}/?token=${auth.token}`
 
   async function copyLink(text: string, which: 'mine' | 'partner') {
@@ -51,7 +53,7 @@ export default function Config() {
               <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-bold">
                 EU
               </div>
-              <span className="font-semibold text-gray-800">Você ({auth.role === 'owner' ? 'Dono' : 'Parceiro'})</span>
+              <span className="font-semibold text-gray-800">Você ({myName})</span>
             </div>
             <p className="text-xs text-gray-500 break-all mb-3">{myLink}</p>
             <button
@@ -64,13 +66,13 @@ export default function Config() {
         </div>
 
         <div>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Link do irmão</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Link do {partnerName}</p>
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center text-white text-xs font-bold">
-                IR
+                {partnerName.slice(0, 2).toUpperCase()}
               </div>
-              <span className="font-semibold text-gray-800">Irmão</span>
+              <span className="font-semibold text-gray-800">{partnerName}</span>
             </div>
             {partnerLink ? (
               <>
@@ -79,7 +81,7 @@ export default function Config() {
                   onClick={() => copyLink(partnerLink, 'partner')}
                   className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold"
                 >
-                  {copied === 'partner' ? '✅ Copiado!' : '📋 Copiar link do irmão'}
+                  {copied === 'partner' ? '✅ Copiado!' : `📋 Copiar link do ${partnerName}`}
                 </button>
               </>
             ) : (
