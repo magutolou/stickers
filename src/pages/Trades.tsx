@@ -55,7 +55,7 @@ export default function Trades() {
               filter === f ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600'
             }`}
           >
-            {f === 'all' ? 'Todas' : f === 'mine' ? 'Minhas' : 'Irmão'}
+            {f === 'all' ? 'Todas' : f === 'mine' ? 'Maguto' : 'Gabriel'}
           </button>
         ))}
       </div>
@@ -80,12 +80,12 @@ export default function Trades() {
                 <div className="flex gap-2 flex-shrink-0">
                   {excessMe > 0 && (
                     <span className="bg-orange-100 text-orange-700 text-xs font-bold rounded-full px-2 py-0.5">
-                      EU +{excessMe}
+                      MAG +{excessMe}
                     </span>
                   )}
                   {excessBro > 0 && (
                     <span className="bg-blue-100 text-blue-700 text-xs font-bold rounded-full px-2 py-0.5">
-                      IR +{excessBro}
+                      GAB +{excessBro}
                     </span>
                   )}
                 </div>

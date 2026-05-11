@@ -64,9 +64,9 @@ export default function StickerModal({ sticker, onClose, onUpdate }: Props) {
           <div className="flex items-center justify-between bg-orange-50 rounded-xl p-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-bold">
-                EU
+                MAG
               </div>
-              <span className="text-sm font-medium">Você</span>
+              <span className="text-sm font-medium">Maguto</span>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -89,9 +89,9 @@ export default function StickerModal({ sticker, onClose, onUpdate }: Props) {
           <div className="flex items-center justify-between bg-blue-50 rounded-xl p-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center text-white text-xs font-bold">
-                IR
+                GAB
               </div>
-              <span className="text-sm font-medium">Irmão</span>
+              <span className="text-sm font-medium">Gabriel</span>
             </div>
             <div className="flex items-center gap-3">
               <button

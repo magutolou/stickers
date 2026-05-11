@@ -25,8 +25,8 @@ const FLAG_EMOJI: Record<string, string> = {
 type FilterOption = { key: StickerFilter; label: string }
 const FILTERS: FilterOption[] = [
   { key: 'all', label: 'Todas' },
-  { key: 'mine', label: 'Minhas' },
-  { key: 'brother', label: 'Irmão' },
+  { key: 'mine', label: 'Maguto' },
+  { key: 'brother', label: 'Gabriel' },
   { key: 'duplicates', label: 'Repetidas' },
 ]
 

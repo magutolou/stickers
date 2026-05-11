@@ -56,12 +56,12 @@ export default function Home() {
           </div>
           <div className="flex gap-2">
             <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-orange-400 flex items-center justify-center text-white font-bold text-sm">EU</div>
-              <span className="text-green-300 text-xs mt-0.5">Você</span>
+              <div className="w-10 h-10 rounded-full bg-orange-400 flex items-center justify-center text-white font-bold text-sm">MAG</div>
+              <span className="text-green-300 text-xs mt-0.5">Maguto</span>
             </div>
             <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center text-white font-bold text-sm">IR</div>
-              <span className="text-green-300 text-xs mt-0.5">Irmão</span>
+              <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center text-white font-bold text-sm">GAB</div>
+              <span className="text-green-300 text-xs mt-0.5">Gabriel</span>
             </div>
           </div>
         </div>
