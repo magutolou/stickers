@@ -201,26 +201,45 @@ export default function Checklist() {
     setTimeout(() => setToast(null), 2500)
   }
 
+  function dismissChip(id: string) {
+    setFadingOut((prev) => new Set(prev).add(id))
+    setTimeout(() => {
+      setFadingOut((prev) => { const n = new Set(prev); n.delete(id); return n })
+      setDismissed((prev) => new Set(prev).add(id))
+    }, 280)
+  }
+
   function handleChipTap(s: StickerRow) {
     if (fadingOut.has(s.id) || dismissed.has(s.id)) return
 
-    setFadingOut((prev) => new Set(prev).add(s.id))
-
     const cs = csMap.get(s.id)
-    const qMe = (cs?.quantity_me ?? 0) + (auth?.role === 'owner' ? 1 : 0)
-    const qBro = (cs?.quantity_brother ?? 0) + (auth?.role === 'partner' ? 1 : 0)
 
-    supabase.from('collection_stickers').upsert(
-      { collection_id: auth!.collectionId, sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro },
-      { onConflict: 'collection_id,sticker_id' }
-    )
+    if (tab === 'missing') {
+      dismissChip(s.id)
+      const qMe = (cs?.quantity_me ?? 0) + (auth?.role === 'owner' ? 1 : 0)
+      const qBro = (cs?.quantity_brother ?? 0) + (auth?.role === 'partner' ? 1 : 0)
+      supabase.from('collection_stickers').upsert(
+        { collection_id: auth!.collectionId, sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro },
+        { onConflict: 'collection_id,sticker_id' }
+      )
+      showToast(`${s.id} registrada para ${profileName}`)
+    } else {
+      const qMe = Math.max(0, (cs?.quantity_me ?? 0) - (auth?.role === 'owner' ? 1 : 0))
+      const qBro = Math.max(0, (cs?.quantity_brother ?? 0) - (auth?.role === 'partner' ? 1 : 0))
+      const { extrasMe, extrasBro } = calcExtras(qMe, qBro)
+      const noExtrasLeft = auth?.role === 'owner' ? extrasMe === 0 : extrasBro === 0
 
-    showToast(`${s.id} registrada para ${profileName}`)
+      // Optimistic update so badge atualiza imediatamente
+      setCsMap((prev) => new Map(prev).set(s.id, { sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro }))
 
-    setTimeout(() => {
-      setFadingOut((prev) => { const n = new Set(prev); n.delete(s.id); return n })
-      setDismissed((prev) => new Set(prev).add(s.id))
-    }, 280)
+      if (noExtrasLeft) dismissChip(s.id)
+
+      supabase.from('collection_stickers').upsert(
+        { collection_id: auth!.collectionId, sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro },
+        { onConflict: 'collection_id,sticker_id' }
+      )
+      showToast(`${s.id} removida das repetidas`)
+    }
   }
 
   return (
@@ -312,6 +331,12 @@ export default function Checklist() {
                         <div className="flex flex-wrap gap-1.5">
                           {teamStickers.map((s) => {
                             const fading = fadingOut.has(s.id)
+                            const extras = (() => {
+                              if (tab !== 'duplicates') return 0
+                              const cs = csMap.get(s.id)
+                              const { extrasMe, extrasBro } = calcExtras(cs?.quantity_me ?? 0, cs?.quantity_brother ?? 0)
+                              return auth?.role === 'owner' ? extrasMe : extrasBro
+                            })()
                             return (
                               <button
                                 key={s.id}
@@ -322,9 +347,14 @@ export default function Checklist() {
                                   transition: 'opacity 0.25s, transform 0.25s',
                                   pointerEvents: fading ? 'none' : 'auto',
                                 }}
-                                className="bg-gray-100 hover:bg-green-100 active:bg-green-200 text-gray-700 text-xs font-mono font-medium rounded-lg px-2.5 py-1.5 border border-gray-200 hover:border-green-300"
+                                className="relative bg-gray-100 hover:bg-green-100 active:bg-green-200 text-gray-700 text-xs font-mono font-medium rounded-lg px-2.5 py-1.5 border border-gray-200 hover:border-green-300"
                               >
                                 {s.id}
+                                {tab === 'duplicates' && extras > 0 && (
+                                  <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 leading-none pointer-events-none">
+                                    {extras}
+                                  </span>
+                                )}
                               </button>
                             )
                           })}
