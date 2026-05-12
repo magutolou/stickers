@@ -55,6 +55,7 @@ function Chevron({ open }: { open: boolean }) {
 export default function Trades() {
   const { auth } = useAuth()
   const [items, setItems] = useState<StickerWithTeam[]>([])
+  const [allTeamsByGroup, setAllTeamsByGroup] = useState<Record<string, string[]>>({})
   const [filter, setFilter] = useState<TradeFilter>('all')
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -63,11 +64,23 @@ export default function Trades() {
     if (!auth) return
 
     async function load() {
-      const { data } = await supabase
-        .from('collection_stickers')
-        .select('*, stickers(*, teams(id, name, group))')
-        .eq('collection_id', auth!.collectionId)
-        .or('quantity_me.gt.0,quantity_brother.gt.0')
+      const [{ data }, { data: teamsData }] = await Promise.all([
+        supabase
+          .from('collection_stickers')
+          .select('*, stickers(*, teams(id, name, group))')
+          .eq('collection_id', auth!.collectionId)
+          .or('quantity_me.gt.0,quantity_brother.gt.0'),
+        supabase.from('teams').select('id, group'),
+      ])
+
+      if (teamsData) {
+        const byGroup: Record<string, string[]> = {}
+        for (const t of teamsData) {
+          if (!byGroup[t.group]) byGroup[t.group] = []
+          byGroup[t.group].push(t.id)
+        }
+        setAllTeamsByGroup(byGroup)
+      }
 
       if (!data) { setLoading(false); return }
 
@@ -105,11 +118,6 @@ export default function Trades() {
     }
     return GROUP_ORDER.filter((g) => map.has(g)).map((g) => ({ group: g, stickers: map.get(g)! }))
   }, [filtered])
-
-  function uniqueTeams(stickers: StickerWithTeam[]) {
-    const seen = new Set<string>()
-    return stickers.filter((s) => s.team_id && !seen.has(s.team_id) && seen.add(s.team_id))
-  }
 
   function toggleGroup(g: string) {
     setOpenGroups((prev) => {
@@ -162,8 +170,8 @@ export default function Trades() {
                     {group === 'FWC' ? 'Especiais FWC' : `Grupo ${group}`}
                   </span>
                   <div className="flex items-center justify-center gap-1.5">
-                    {uniqueTeams(stickers).map((s) => (
-                      <FlagIcon key={s.team_id} teamId={s.team_id!} />
+                    {(allTeamsByGroup[group] ?? []).map((teamId) => (
+                      <FlagIcon key={teamId} teamId={teamId} />
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
