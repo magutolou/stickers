@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
@@ -30,6 +30,12 @@ const ISO_CODE: Record<string, string> = {
   ENG: 'gb-eng', CRO: 'hr', GHA: 'gh', PAN: 'pa',
 }
 
+const normalize = (str: string) =>
+  str.normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[-\s]/g, '')
+    .toLowerCase()
+
 function FlagIcon({ teamId }: { teamId: string }) {
   const iso = ISO_CODE[teamId]
   if (!iso) return <span>{FLAG_EMOJI[teamId] || '🏳️'}</span>
@@ -39,14 +45,9 @@ function FlagIcon({ teamId }: { teamId: string }) {
 function Chevron({ open }: { open: boolean }) {
   return (
     <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      width="18" height="18" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" strokeWidth="2.5"
+      strokeLinecap="round" strokeLinejoin="round"
       style={{ transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
     >
       <polyline points="6 9 12 15 18 9" />
@@ -60,6 +61,9 @@ export default function Album() {
   const [teams, setTeams] = useState<TeamWithProgress[]>([])
   const [loading, setLoading] = useState(true)
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set())
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!auth) return
@@ -100,19 +104,49 @@ export default function Album() {
     load()
   }, [auth])
 
-  const grouped = GROUP_ORDER.reduce<Record<string, TeamWithProgress[]>>((acc, g) => {
-    const list = teams.filter((t) => t.group === g)
-    if (list.length) acc[g] = list
-    return acc
-  }, {})
+  function openSearch() {
+    setIsSearchOpen(true)
+    setTimeout(() => inputRef.current?.focus(), 50)
+  }
+
+  function closeSearch() {
+    setIsSearchOpen(false)
+    setSearchQuery('')
+  }
+
+  const isSearchActive = isSearchOpen && searchQuery.trim().length > 0
+
+  const displayTeams = useMemo(() => {
+    if (!isSearchActive) return teams
+    const nq = normalize(searchQuery)
+    return teams.filter((t) => {
+      const nName = normalize(t.name)
+      const nId = normalize(t.id)
+      return nName.includes(nq) || nId.startsWith(nq) || nq.startsWith(nId)
+    })
+  }, [teams, searchQuery, isSearchActive])
+
+  const grouped = useMemo(() => {
+    return GROUP_ORDER.reduce<Record<string, TeamWithProgress[]>>((acc, g) => {
+      const list = displayTeams.filter((t) => t.group === g)
+      if (list.length) acc[g] = list
+      return acc
+    }, {})
+  }, [displayTeams])
 
   function toggleGroup(group: string) {
+    if (isSearchActive) return
     setOpenGroups((prev) => {
       const next = new Set(prev)
       if (next.has(group)) next.delete(group)
       else next.add(group)
       return next
     })
+  }
+
+  function isGroupOpen(group: string) {
+    if (isSearchActive) return true
+    return openGroups.has(group)
   }
 
   if (loading) {
@@ -125,15 +159,59 @@ export default function Album() {
 
   const fwcTeams = grouped['FWC']
   const regularGroups = Object.entries(grouped).filter(([g]) => g !== 'FWC')
+  const totalFound = displayTeams.length
 
   return (
     <div className="pb-4">
       <div className="bg-green-800 px-4 pt-10 pb-4">
-        <h1 className="text-white text-xl font-bold">Álbum</h1>
-        <p className="text-green-300 text-sm">Copa do Mundo 2026</p>
+        {isSearchOpen ? (
+          <div
+            className="flex items-center gap-2"
+            style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '20px', padding: '7px 14px' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-70">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              ref={inputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="País ou código..."
+              className="flex-1 bg-transparent text-white placeholder-white/50 text-sm outline-none"
+            />
+            <button onClick={closeSearch} className="text-white/70 hover:text-white shrink-0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-white text-xl font-bold">Álbum</h1>
+              <p className="text-green-300 text-sm">Copa do Mundo 2026</p>
+            </div>
+            <button onClick={openSearch} className="text-white/70 hover:text-white mt-1">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="px-4 mt-4 space-y-5">
+        {isSearchActive && (
+          <p className="text-xs text-gray-500 text-center -mt-2">
+            {totalFound === 0
+              ? 'Nenhuma figurinha encontrada'
+              : totalFound === 1
+              ? '1 país encontrado'
+              : `${totalFound} países encontrados`}
+          </p>
+        )}
+
         {fwcTeams && (
           <div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Especiais FWC</p>
@@ -148,7 +226,12 @@ export default function Album() {
                   >
                     <span className="text-2xl">{FLAG_EMOJI[team.id] || '🏳️'}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-gray-800 truncate">{team.name}</p>
+                      <p
+                        className="font-semibold text-sm truncate"
+                        style={isSearchActive ? { fontWeight: 500, color: '#7a5200' } : { color: '#1f2937' }}
+                      >
+                        {team.name}
+                      </p>
                       <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                         <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
                       </div>
@@ -163,10 +246,12 @@ export default function Album() {
 
         {regularGroups.length > 0 && (
           <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Grupos</p>
+            {!isSearchActive && (
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Grupos</p>
+            )}
             <div className="space-y-2">
               {regularGroups.map(([group, list]) => {
-                const isOpen = openGroups.has(group)
+                const isOpen = isGroupOpen(group)
                 return (
                   <div key={group} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                     <button
@@ -184,9 +269,11 @@ export default function Album() {
                         <span className="text-xs text-gray-400">
                           {list.reduce((s, t) => s + t.collected, 0)}/{list.reduce((s, t) => s + t.total, 0)}
                         </span>
-                        <span className="text-gray-400">
-                          <Chevron open={isOpen} />
-                        </span>
+                        {!isSearchActive && (
+                          <span className="text-gray-400">
+                            <Chevron open={isOpen} />
+                          </span>
+                        )}
                       </div>
                     </button>
 
@@ -202,7 +289,12 @@ export default function Album() {
                             >
                               <FlagIcon teamId={team.id} />
                               <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-sm text-gray-800 truncate">{team.name}</p>
+                                <p
+                                  className="font-semibold text-sm truncate"
+                                  style={isSearchActive ? { fontWeight: 500, color: '#7a5200' } : { color: '#1f2937' }}
+                                >
+                                  {team.name}
+                                </p>
                                 <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                                   <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
                                 </div>
@@ -218,6 +310,10 @@ export default function Album() {
               })}
             </div>
           </div>
+        )}
+
+        {isSearchActive && totalFound === 0 && (
+          <p className="text-center text-gray-400 py-12">Nenhuma figurinha encontrada</p>
         )}
       </div>
     </div>

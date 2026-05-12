@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
 import { calcExtras } from '../lib/extras'
@@ -35,6 +35,12 @@ const ISO_CODE: Record<string, string> = {
   ENG: 'gb-eng', CRO: 'hr', GHA: 'gh', PAN: 'pa',
 }
 
+const normalize = (str: string) =>
+  str.normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[-\s]/g, '')
+    .toLowerCase()
+
 function Flag({ teamId }: { teamId: string }) {
   const iso = ISO_CODE[teamId]
   if (!iso) return <span style={{ fontSize: '0.9rem' }}>🏟️</span>
@@ -70,6 +76,9 @@ export default function Checklist() {
   const [toast, setToast] = useState<string | null>(null)
   const [fadingOut, setFadingOut] = useState<Set<string>>(new Set())
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const profileName = auth?.role === 'owner' ? 'Maguto' : 'Gabriel'
 
@@ -154,17 +163,27 @@ export default function Checklist() {
     })
   }, [allStickers, csMap, tab, auth])
 
+  const isSearchActive = isSearchOpen && searchQuery.trim().length > 0
+
+  const effectiveList = useMemo(() => {
+    if (!isSearchActive) return rawList
+    const nq = normalize(searchQuery)
+    return rawList.filter((s) =>
+      normalize(s.id).includes(nq) || normalize(s.team_name).includes(nq)
+    )
+  }, [rawList, searchQuery, isSearchActive])
+
   const grouped = useMemo(() => {
     const map = new Map<string, StickerRow[]>()
 
-    for (const s of rawList) {
+    for (const s of effectiveList) {
       if (dismissed.has(s.id)) continue
       const g = s.team_group
       if (!map.has(g)) map.set(g, [])
       map.get(g)!.push(s)
     }
 
-    // Keep chips currently fading out even if Realtime already removed them from rawList
+    // Keep chips currently fading out even if Realtime already removed them from effectiveList
     for (const id of fadingOut) {
       const s = stickerById.get(id)
       if (!s || dismissed.has(id)) continue
@@ -179,15 +198,36 @@ export default function Checklist() {
     return GROUP_ORDER
       .filter((g) => map.has(g))
       .map((g) => ({ group: g, stickers: map.get(g)! }))
-  }, [rawList, dismissed, fadingOut, stickerById])
+  }, [effectiveList, dismissed, fadingOut, stickerById])
+
+  const searchResultCount = useMemo(() => {
+    if (!isSearchActive) return 0
+    return effectiveList.filter((s) => !dismissed.has(s.id)).length
+  }, [effectiveList, dismissed, isSearchActive])
+
+  function openSearch() {
+    setIsSearchOpen(true)
+    setTimeout(() => inputRef.current?.focus(), 50)
+  }
+
+  function closeSearch() {
+    setIsSearchOpen(false)
+    setSearchQuery('')
+  }
 
   function toggleGroup(g: string) {
+    if (isSearchActive) return
     setOpenGroups((prev) => {
       const next = new Set(prev)
       if (next.has(g)) next.delete(g)
       else next.add(g)
       return next
     })
+  }
+
+  function isGroupOpen(g: string) {
+    if (isSearchActive) return true
+    return openGroups.has(g)
   }
 
   function switchTab(t: Tab) {
@@ -229,7 +269,6 @@ export default function Checklist() {
       const { extrasMe, extrasBro } = calcExtras(qMe, qBro)
       const noExtrasLeft = auth?.role === 'owner' ? extrasMe === 0 : extrasBro === 0
 
-      // Optimistic update so badge atualiza imediatamente
       setCsMap((prev) => new Map(prev).set(s.id, { sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro }))
 
       if (noExtrasLeft) dismissChip(s.id)
@@ -244,14 +283,47 @@ export default function Checklist() {
 
   return (
     <div>
-      <div className="bg-green-800 px-4 pt-10 pb-4 flex items-start justify-between">
-        <div>
-          <h1 className="text-white text-xl font-bold">Checklist</h1>
-          <p className="text-green-300 text-sm">Toque para registrar figurinha obtida</p>
-        </div>
-        <span className="bg-green-700 text-white text-xs font-semibold px-3 py-1.5 rounded-full mt-1 whitespace-nowrap">
-          EU — {profileName}
-        </span>
+      <div className="bg-green-800 px-4 pt-10 pb-4">
+        {isSearchOpen ? (
+          <div
+            className="flex items-center gap-2"
+            style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '20px', padding: '7px 14px' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-70">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              ref={inputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="País ou código..."
+              className="flex-1 bg-transparent text-white placeholder-white/50 text-sm outline-none"
+            />
+            <button onClick={closeSearch} className="text-white/70 hover:text-white shrink-0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-white text-xl font-bold">Checklist</h1>
+              <p className="text-green-300 text-sm">Toque para registrar figurinha obtida</p>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <button onClick={openSearch} className="text-white/70 hover:text-white">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+              <span className="bg-green-700 text-white text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap">
+                EU — {profileName}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2 px-4 pt-3 pb-2">
@@ -277,105 +349,128 @@ export default function Checklist() {
         <div className="flex items-center justify-center h-40">
           <div className="w-6 h-6 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : grouped.length === 0 ? (
-        <p className="text-center text-gray-400 py-12">
-          {tab === 'missing' ? 'Nenhuma figurinha faltando!' : 'Nenhuma repetida ainda'}
-        </p>
       ) : (
-        <div className="px-4 space-y-2 pb-6 mt-1">
-          {grouped.map(({ group, stickers }) => {
-            const isOpen = openGroups.has(group)
-            const visibleCount = stickers.filter((s) => !fadingOut.has(s.id)).length
+        <>
+          {isSearchActive && (
+            <p className="text-xs text-gray-500 text-center pt-1 pb-0">
+              {searchResultCount === 0
+                ? 'Nenhuma figurinha encontrada'
+                : `${searchResultCount} resultado${searchResultCount !== 1 ? 's' : ''} para "${searchQuery}"`}
+            </p>
+          )}
 
-            const byTeam = new Map<string, StickerRow[]>()
-            for (const s of stickers) {
-              if (!byTeam.has(s.team_id)) byTeam.set(s.team_id, [])
-              byTeam.get(s.team_id)!.push(s)
-            }
+          {grouped.length === 0 ? (
+            <p className="text-center text-gray-400 py-12">
+              {isSearchActive
+                ? 'Nenhuma figurinha encontrada'
+                : tab === 'missing'
+                ? 'Nenhuma figurinha faltando!'
+                : 'Nenhuma repetida ainda'}
+            </p>
+          ) : (
+            <div className="px-4 space-y-2 pb-6 mt-1">
+              {grouped.map(({ group, stickers }) => {
+                const isOpen = isGroupOpen(group)
+                const visibleCount = stickers.filter((s) => !fadingOut.has(s.id)).length
 
-            return (
-              <div key={group} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                <button
-                  onClick={() => toggleGroup(group)}
-                  className="w-full grid items-center px-4 py-3"
-                  style={{ gridTemplateColumns: 'auto 1fr auto' }}
-                >
-                  <span className="font-semibold text-gray-800 text-sm text-left">
-                    {group === 'FWC' ? 'Especiais FWC' : `Grupo ${group}`}
-                  </span>
-                  <div className="flex items-center justify-center gap-1.5">
-                    {(teamsByGroup[group] ?? []).map((tid) => (
-                      <Flag key={tid} teamId={tid} />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-green-100 text-green-700 text-xs font-bold rounded-full px-2 py-0.5">
-                      {visibleCount}
-                    </span>
-                    <span className="text-gray-400">
-                      <Chevron open={isOpen} />
-                    </span>
-                  </div>
-                </button>
+                const byTeam = new Map<string, StickerRow[]>()
+                for (const s of stickers) {
+                  if (!byTeam.has(s.team_id)) byTeam.set(s.team_id, [])
+                  byTeam.get(s.team_id)!.push(s)
+                }
 
-                {isOpen && (
-                  <div className="border-t border-gray-100 px-3 pb-3 pt-2 space-y-3">
-                    {Array.from(byTeam.entries()).map(([teamId, teamStickers]) => (
-                      <div key={teamId}>
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <Flag teamId={teamId} />
-                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                            {teamStickers[0]?.team_name}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {teamStickers.map((s) => {
-                            const fading = fadingOut.has(s.id)
-                            const extras = (() => {
-                              if (tab !== 'duplicates') return 0
-                              const cs = csMap.get(s.id)
-                              const { extrasMe, extrasBro } = calcExtras(cs?.quantity_me ?? 0, cs?.quantity_brother ?? 0)
-                              return auth?.role === 'owner' ? extrasMe : extrasBro
-                            })()
-                            return (
-                              <button
-                                key={s.id}
-                                onClick={() => handleChipTap(s)}
-                                style={{
-                                  opacity: fading ? 0 : 1,
-                                  transform: fading ? 'scale(0.7)' : 'scale(1)',
-                                  transition: 'opacity 0.25s, transform 0.25s',
-                                  pointerEvents: fading ? 'none' : 'auto',
-                                }}
-                                className="relative bg-gray-100 hover:bg-green-100 active:bg-green-200 text-gray-700 text-xs font-mono font-medium rounded-lg px-2.5 py-1.5 border border-gray-200 hover:border-green-300"
-                              >
-                                {s.id}
-                                {tab === 'duplicates' && extras > 0 && (
-                                  <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 leading-none pointer-events-none">
-                                    {extras}
-                                  </span>
-                                )}
-                              </button>
-                            )
-                          })}
-                        </div>
+                return (
+                  <div key={group} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                    <button
+                      onClick={() => toggleGroup(group)}
+                      className="w-full grid items-center px-4 py-3"
+                      style={{ gridTemplateColumns: 'auto 1fr auto' }}
+                    >
+                      <span className="font-semibold text-gray-800 text-sm text-left">
+                        {group === 'FWC' ? 'Especiais FWC' : `Grupo ${group}`}
+                      </span>
+                      <div className="flex items-center justify-center gap-1.5">
+                        {(teamsByGroup[group] ?? []).map((tid) => (
+                          <Flag key={tid} teamId={tid} />
+                        ))}
                       </div>
-                    ))}
-                    <p className="text-xs text-gray-400 mt-1">
-                      Registrado como {profileName} automaticamente
-                    </p>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-green-100 text-green-700 text-xs font-bold rounded-full px-2 py-0.5">
+                          {visibleCount}
+                        </span>
+                        {!isSearchActive && (
+                          <span className="text-gray-400">
+                            <Chevron open={isOpen} />
+                          </span>
+                        )}
+                      </div>
+                    </button>
+
+                    {isOpen && (
+                      <div className="border-t border-gray-100 px-3 pb-3 pt-2 space-y-3">
+                        {Array.from(byTeam.entries()).map(([teamId, teamStickers]) => (
+                          <div key={teamId}>
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Flag teamId={teamId} />
+                              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                {teamStickers[0]?.team_name}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {teamStickers.map((s) => {
+                                const fading = fadingOut.has(s.id)
+                                const extras = (() => {
+                                  if (tab !== 'duplicates') return 0
+                                  const cs = csMap.get(s.id)
+                                  const { extrasMe, extrasBro } = calcExtras(cs?.quantity_me ?? 0, cs?.quantity_brother ?? 0)
+                                  return auth?.role === 'owner' ? extrasMe : extrasBro
+                                })()
+                                return (
+                                  <button
+                                    key={s.id}
+                                    onClick={() => handleChipTap(s)}
+                                    style={{
+                                      opacity: fading ? 0 : 1,
+                                      transform: fading ? 'scale(0.7)' : 'scale(1)',
+                                      transition: 'opacity 0.25s, transform 0.25s',
+                                      pointerEvents: fading ? 'none' : 'auto',
+                                      ...(isSearchActive
+                                        ? { background: '#fff8e6', borderColor: '#d4a020', color: '#7a5200' }
+                                        : {}),
+                                    }}
+                                    className={`relative text-xs font-mono font-medium rounded-lg px-2.5 py-1.5 border ${
+                                      isSearchActive
+                                        ? 'hover:brightness-95 active:brightness-90'
+                                        : 'bg-gray-100 hover:bg-green-100 active:bg-green-200 text-gray-700 border-gray-200 hover:border-green-300'
+                                    }`}
+                                  >
+                                    {s.id}
+                                    {tab === 'duplicates' && extras > 0 && (
+                                      <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 leading-none pointer-events-none">
+                                        {extras}
+                                      </span>
+                                    )}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                        <p className="text-xs text-gray-400 mt-1">
+                          Registrado como {profileName} automaticamente
+                        </p>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
+                )
+              })}
+            </div>
+          )}
+        </>
       )}
 
       {toast && (
-        <div
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg whitespace-nowrap"
-        >
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg whitespace-nowrap">
           {toast}
         </div>
       )}
