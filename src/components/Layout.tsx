@@ -2,7 +2,6 @@ import { Outlet, NavLink } from 'react-router-dom'
 
 const tabs = [
   { to: '/album', label: 'Álbum', icon: '📖' },
-  { to: '/trocas', label: 'Trocas', icon: '🔄' },
   { to: '/home', label: 'Início', icon: '🏠' },
   { to: '/checklist', label: 'Lista', icon: '☑️' },
   { to: '/config', label: 'Config', icon: '⚙️' },

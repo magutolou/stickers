@@ -5,7 +5,6 @@ import Welcome from './pages/Welcome'
 import Home from './pages/Home'
 import Album from './pages/Album'
 import Section from './pages/Section'
-import Trades from './pages/Trades'
 import Checklist from './pages/Checklist'
 import Config from './pages/Config'
 import Layout from './components/Layout'
@@ -66,7 +65,6 @@ function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/album" element={<Album />} />
               <Route path="/album/:teamId" element={<Section />} />
-              <Route path="/trocas" element={<Trades />} />
               <Route path="/checklist" element={<Checklist />} />
               <Route path="/config" element={<Config />} />
               <Route path="*" element={<Navigate to="/home" replace />} />

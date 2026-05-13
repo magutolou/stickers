@@ -111,12 +111,12 @@ export default function Home() {
           <span className="ml-auto text-xl">›</span>
         </button>
         <button
-          onClick={() => navigate('/trocas')}
+          onClick={() => navigate('/checklist')}
           className="w-full bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm"
         >
-          <span className="text-3xl">🔄</span>
+          <span className="text-3xl">☑️</span>
           <div className="text-left">
-            <p className="font-semibold text-gray-800">Trocas</p>
+            <p className="font-semibold text-gray-800">Checklist</p>
             <p className="text-gray-500 text-sm">{stats.duplicates} figurinhas repetidas</p>
           </div>
           <span className="ml-auto text-gray-400 text-xl">›</span>
