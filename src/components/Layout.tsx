@@ -1,7 +1,8 @@
 import { Outlet, NavLink } from 'react-router-dom'
 
 const tabs = [
-  { to: '/album',     label: 'Álbum', icon: 'ti-book' },
+  { to: '/camera',    label: 'Câmera', icon: 'ti-camera' },
+  { to: '/album',     label: 'Álbum',  icon: 'ti-book' },
   { to: '/home',      label: 'Início', icon: 'ti-home' },
   { to: '/checklist', label: 'Lista',  icon: 'ti-list-check' },
   { to: '/config',    label: 'Config', icon: 'ti-settings' },

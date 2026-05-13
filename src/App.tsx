@@ -5,6 +5,7 @@ import Welcome from './pages/Welcome'
 import Home from './pages/Home'
 import Album from './pages/Album'
 import Section from './pages/Section'
+import Camera from './pages/Camera'
 import Checklist from './pages/Checklist'
 import Config from './pages/Config'
 import Layout from './components/Layout'
@@ -82,6 +83,7 @@ function App() {
           ) : (
             <Route element={<Layout />}>
               <Route path="/" element={<Navigate to="/home" replace />} />
+              <Route path="/camera" element={<Camera />} />
               <Route path="/home" element={<Home />} />
               <Route path="/album" element={<Album />} />
               <Route path="/album/:teamId" element={<Section />} />
