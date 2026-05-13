@@ -9,8 +9,8 @@ const tabs = [
 
 export default function Layout() {
   return (
-    <div className="flex flex-col min-h-screen w-full max-w-md mx-auto bg-[#f4f1eb] dark:bg-[#111111]">
-      <main className="flex-1 w-full overflow-y-auto pb-20 bg-[#f4f1eb] dark:bg-[#111111]">
+    <div className="flex flex-col min-h-screen w-full max-w-md mx-auto bg-[#f8f8f6] dark:bg-[#111111]">
+      <main className="flex-1 w-full overflow-y-auto pb-20 bg-[#f8f8f6] dark:bg-[#111111]">
         <Outlet />
       </main>
       <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white dark:bg-[#1e1e1e] border-t border-gray-200 dark:border-[#333] flex">

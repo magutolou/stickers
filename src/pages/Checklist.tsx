@@ -442,7 +442,7 @@ export default function Checklist() {
                                     className={`relative text-xs font-mono font-medium rounded-lg px-2.5 py-1.5 border ${
                                       isSearchActive
                                         ? 'bg-[#fff8e6] dark:bg-[#2a2000] border-[#d4a020] dark:border-[#c49000] text-[#7a5200] dark:text-[#f0c040] hover:brightness-95 active:brightness-90'
-                                        : 'bg-[#f4f1eb] dark:bg-[#2a2a2a] border-[#c8c3b8] dark:border-[#444] text-[#333] dark:text-[#ddd] hover:bg-green-100 hover:border-green-300 dark:hover:bg-[#1a3a1a] dark:hover:border-[#2a5a2a]'
+                                        : 'bg-[#f8f8f6] dark:bg-[#2a2a2a] border-[#c8c3b8] dark:border-[#444] text-[#333] dark:text-[#ddd] hover:bg-green-100 hover:border-green-300 dark:hover:bg-[#1a3a1a] dark:hover:border-[#2a5a2a]'
                                     }`}
                                   >
                                     {s.id}
