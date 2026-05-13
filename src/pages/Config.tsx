@@ -53,10 +53,10 @@ export default function Config() {
             <span className="text-sm font-medium text-gray-800 dark:text-[#f0f0f0]">Modo noturno</span>
             <button
               onClick={toggleDarkMode}
-              className={`relative w-12 h-6 rounded-full transition-colors ${darkMode ? 'bg-green-600' : 'bg-gray-300'}`}
+              className={`relative w-11 h-6 rounded-full transition-colors ${darkMode ? 'bg-green-600' : 'bg-gray-300'}`}
             >
               <span
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${darkMode ? 'translate-x-7' : 'translate-x-1'}`}
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${darkMode ? 'translate-x-5' : 'translate-x-0'}`}
               />
             </button>
           </div>
