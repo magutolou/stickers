@@ -334,7 +334,7 @@ export default function Checklist() {
         <button
           onClick={() => switchTab('missing')}
           className={`flex-1 py-2 rounded-full text-sm font-medium ${
-            tab === 'missing' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600'
+            tab === 'missing' ? 'bg-green-700 text-white' : 'bg-white dark:bg-[#2a2a2a] text-[#555] dark:text-[#aaa] border border-[#d0ccc5] dark:border-[#444]'
           }`}
         >
           Faltando
@@ -342,7 +342,7 @@ export default function Checklist() {
         <button
           onClick={() => switchTab('duplicates')}
           className={`flex-1 py-2 rounded-full text-sm font-medium ${
-            tab === 'duplicates' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-600'
+            tab === 'duplicates' ? 'bg-green-700 text-white' : 'bg-white dark:bg-[#2a2a2a] text-[#555] dark:text-[#aaa] border border-[#d0ccc5] dark:border-[#444]'
           }`}
         >
           Repetidas
@@ -356,7 +356,7 @@ export default function Checklist() {
       ) : (
         <>
           {isSearchActive && (
-            <p className="text-xs text-gray-500 text-center pt-1 pb-0">
+            <p className="text-xs text-gray-500 dark:text-[#aaa] text-center pt-1 pb-0">
               {searchResultCount === 0
                 ? 'Nenhuma figurinha encontrada'
                 : `${searchResultCount} resultado${searchResultCount !== 1 ? 's' : ''} para "${searchQuery}"`}
@@ -364,7 +364,7 @@ export default function Checklist() {
           )}
 
           {grouped.length === 0 ? (
-            <p className="text-center text-gray-400 py-12">
+            <p className="text-center text-gray-400 dark:text-[#555] py-12">
               {isSearchActive
                 ? 'Nenhuma figurinha encontrada'
                 : tab === 'missing'
@@ -384,13 +384,13 @@ export default function Checklist() {
                 }
 
                 return (
-                  <div key={group} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                  <div key={group} className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-2xl shadow-sm overflow-hidden">
                     <button
                       onClick={() => toggleGroup(group)}
                       className="w-full grid items-center px-4 py-3"
                       style={{ gridTemplateColumns: 'auto 1fr auto' }}
                     >
-                      <span className="font-semibold text-gray-800 text-sm text-left">
+                      <span className="font-semibold text-gray-800 dark:text-[#f0f0f0] text-sm text-left">
                         {group === 'FWC' ? 'Especiais FWC' : `Grupo ${group}`}
                       </span>
                       <div className="flex items-center justify-center gap-1.5">
@@ -399,11 +399,11 @@ export default function Checklist() {
                         ))}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="bg-green-100 text-green-700 text-xs font-bold rounded-full px-2 py-0.5">
+                        <span className="bg-green-100 dark:bg-[#1a3010] text-green-700 dark:text-[#6db84a] text-xs font-bold rounded-full px-2 py-0.5">
                           {visibleCount}
                         </span>
                         {!isSearchActive && (
-                          <span className="text-gray-400">
+                          <span className="text-gray-400 dark:text-[#555]">
                             <Chevron open={isOpen} />
                           </span>
                         )}
@@ -411,12 +411,12 @@ export default function Checklist() {
                     </button>
 
                     {isOpen && (
-                      <div className="border-t border-gray-100 px-3 pb-3 pt-2 space-y-3">
+                      <div className="border-t border-gray-100 dark:border-[#2a2a2a] px-3 pb-3 pt-2 space-y-3">
                         {Array.from(byTeam.entries()).map(([teamId, teamStickers]) => (
                           <div key={teamId}>
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Flag teamId={teamId} />
-                              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                              <span className="text-xs font-semibold text-gray-500 dark:text-[#aaa] uppercase tracking-wide">
                                 {teamStickers[0]?.team_name}
                               </span>
                             </div>
@@ -438,14 +438,11 @@ export default function Checklist() {
                                       transform: fading ? 'scale(0.7)' : 'scale(1)',
                                       transition: 'opacity 0.25s, transform 0.25s',
                                       pointerEvents: fading ? 'none' : 'auto',
-                                      ...(isSearchActive
-                                        ? { background: '#fff8e6', borderColor: '#d4a020', color: '#7a5200' }
-                                        : {}),
                                     }}
                                     className={`relative text-xs font-mono font-medium rounded-lg px-2.5 py-1.5 border ${
                                       isSearchActive
-                                        ? 'hover:brightness-95 active:brightness-90'
-                                        : 'bg-gray-100 hover:bg-green-100 active:bg-green-200 text-gray-700 border-gray-200 hover:border-green-300'
+                                        ? 'bg-[#fff8e6] dark:bg-[#2a2000] border-[#d4a020] dark:border-[#c49000] text-[#7a5200] dark:text-[#f0c040] hover:brightness-95 active:brightness-90'
+                                        : 'bg-[#f4f1eb] dark:bg-[#2a2a2a] border-[#c8c3b8] dark:border-[#444] text-[#333] dark:text-[#ddd] hover:bg-green-100 hover:border-green-300'
                                     }`}
                                   >
                                     {s.id}
@@ -460,7 +457,7 @@ export default function Checklist() {
                             </div>
                           </div>
                         ))}
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-400 dark:text-[#555] mt-1">
                           Registrado como {profileName} automaticamente
                         </p>
                       </div>

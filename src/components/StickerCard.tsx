@@ -11,10 +11,22 @@ function getStyle(s: StickerWithStatus): { card: string; text: string } {
   const bro = s.quantity_brother ?? 0
   const total = me + bro
 
-  if (total === 0)              return { card: 'bg-gray-100 border-gray-200',    text: 'text-gray-400' }
-  if (total > 1)                return { card: 'bg-red-50 border-red-400',       text: 'text-red-700' }
-  if (me === 1)                 return { card: 'bg-orange-50 border-orange-400', text: 'text-orange-800' }
-  return                               { card: 'bg-blue-50 border-blue-400',     text: 'text-blue-800' }
+  if (total === 0) return {
+    card: 'bg-gray-100 border-gray-200 dark:bg-[#3a3a3a] dark:border-[#3a3a3a]',
+    text: 'text-gray-400 dark:text-[#888]',
+  }
+  if (total > 1) return {
+    card: 'bg-red-50 border-red-400 dark:bg-[#3a0a0a] dark:border-[#6a1a1a]',
+    text: 'text-red-700 dark:text-[#ff8888]',
+  }
+  if (me === 1) return {
+    card: 'bg-orange-50 border-orange-400 dark:bg-[#4a2800] dark:border-[#7a4400]',
+    text: 'text-orange-800 dark:text-[#ffaa66]',
+  }
+  return {
+    card: 'bg-blue-50 border-blue-400 dark:bg-[#002a4a] dark:border-[#004a7a]',
+    text: 'text-blue-800 dark:text-[#66aaff]',
+  }
 }
 
 export default function StickerCard({ sticker, onClick }: Props) {

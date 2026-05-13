@@ -134,7 +134,7 @@ export default function Section() {
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium ${
               filter === f.key
                 ? 'bg-green-700 text-white'
-                : 'bg-gray-100 text-gray-600'
+                : 'bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-[#aaa]'
             }`}
           >
             {f.label}
@@ -144,7 +144,7 @@ export default function Section() {
 
       <div className="px-4 pb-6">
         {filtered.length === 0 ? (
-          <p className="text-center text-gray-400 py-8">Nenhuma figurinha neste filtro</p>
+          <p className="text-center text-gray-400 dark:text-[#555] py-8">Nenhuma figurinha neste filtro</p>
         ) : (
           <div className="grid grid-cols-3 gap-2">
             {filtered.map((s) => (

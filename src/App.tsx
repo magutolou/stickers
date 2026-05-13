@@ -12,14 +12,34 @@ import Layout from './components/Layout'
 interface AuthCtx {
   auth: AuthState | null
   setAuth: (a: AuthState | null) => void
+  darkMode: boolean
+  toggleDarkMode: () => void
 }
 
-export const AuthCtxContext = createContext<AuthCtx>({ auth: null, setAuth: () => {} })
+export const AuthCtxContext = createContext<AuthCtx>({
+  auth: null,
+  setAuth: () => {},
+  darkMode: false,
+  toggleDarkMode: () => {},
+})
 export const useAuth = () => useContext(AuthCtxContext)
 
 function App() {
   const [auth, setAuth] = useState<AuthState | null>(null)
   const [loading, setLoading] = useState(true)
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('dark_mode') === 'true')
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode)
+  }, [darkMode])
+
+  function toggleDarkMode() {
+    setDarkMode((prev) => {
+      const next = !prev
+      localStorage.setItem('dark_mode', String(next))
+      return next
+    })
+  }
 
   useEffect(() => {
     async function init() {
@@ -51,7 +71,7 @@ function App() {
   }
 
   return (
-    <AuthCtxContext.Provider value={{ auth, setAuth }}>
+    <AuthCtxContext.Provider value={{ auth, setAuth, darkMode, toggleDarkMode }}>
       <BrowserRouter>
         <Routes>
           {!auth ? (
