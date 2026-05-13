@@ -9,6 +9,12 @@ interface TeamWithProgress extends Team {
   collected: number
 }
 
+interface CsRow {
+  sticker_id: string
+  quantity_me: number
+  quantity_brother: number
+}
+
 const GROUP_ORDER = ['FWC', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
 const FLAG_EMOJI: Record<string, string> = {
@@ -58,7 +64,9 @@ function Chevron({ open }: { open: boolean }) {
 export default function Album() {
   const { auth } = useAuth()
   const navigate = useNavigate()
-  const [teams, setTeams] = useState<TeamWithProgress[]>([])
+  const [rawTeams, setRawTeams] = useState<Team[]>([])
+  const [stickersByTeam, setStickersByTeam] = useState<Record<string, string[]>>({})
+  const [csMap, setCsMap] = useState<Map<string, CsRow>>(new Map())
   const [loading, setLoading] = useState(true)
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
@@ -74,35 +82,60 @@ export default function Album() {
         supabase.from('stickers').select('id, team_id'),
         supabase
           .from('collection_stickers')
-          .select('sticker_id, owned')
-          .eq('collection_id', auth!.collectionId)
-          .eq('owned', true),
+          .select('sticker_id, quantity_me, quantity_brother')
+          .eq('collection_id', auth!.collectionId),
       ])
 
       if (!teamsRes.data) return
 
-      const collectedIds = new Set((collectionRes.data || []).map((s) => s.sticker_id))
-      const stickersByTeam: Record<string, string[]> = {}
+      const byTeam: Record<string, string[]> = {}
       for (const s of stickersRes.data || []) {
-        if (!stickersByTeam[s.team_id]) stickersByTeam[s.team_id] = []
-        stickersByTeam[s.team_id].push(s.id)
+        if (!byTeam[s.team_id]) byTeam[s.team_id] = []
+        byTeam[s.team_id].push(s.id)
       }
+      setStickersByTeam(byTeam)
 
-      const result: TeamWithProgress[] = teamsRes.data.map((t) => {
-        const ids = stickersByTeam[t.id] || []
-        return {
-          ...t,
-          total: ids.length,
-          collected: ids.filter((id) => collectedIds.has(id)).length,
-        }
-      })
+      const map = new Map<string, CsRow>()
+      for (const cs of collectionRes.data as CsRow[] || []) map.set(cs.sticker_id, cs)
+      setCsMap(map)
 
-      setTeams(result)
+      setRawTeams(teamsRes.data)
       setLoading(false)
     }
 
     load()
   }, [auth])
+
+  useEffect(() => {
+    if (!auth) return
+    const ch = supabase
+      .channel('album-rt')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'collection_stickers', filter: `collection_id=eq.${auth.collectionId}` },
+        (payload) => {
+          const rec = payload.new as CsRow
+          if (!rec?.sticker_id) return
+          setCsMap((prev) => new Map(prev).set(rec.sticker_id, rec))
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [auth])
+
+  const teams = useMemo<TeamWithProgress[]>(() => {
+    return rawTeams.map((t) => {
+      const ids = stickersByTeam[t.id] || []
+      return {
+        ...t,
+        total: ids.length,
+        collected: ids.filter((id) => {
+          const cs = csMap.get(id)
+          return cs && (cs.quantity_me > 0 || cs.quantity_brother > 0)
+        }).length,
+      }
+    })
+  }, [rawTeams, stickersByTeam, csMap])
 
   function openSearch() {
     setIsSearchOpen(true)
