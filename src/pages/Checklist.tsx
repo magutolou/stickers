@@ -249,34 +249,38 @@ export default function Checklist() {
     }, 280)
   }
 
-  function handleChipTap(s: StickerRow) {
+  async function handleChipTap(s: StickerRow) {
     if (fadingOut.has(s.id) || dismissed.has(s.id)) return
 
     const cs = csMap.get(s.id)
 
     if (tab === 'missing') {
-      dismissChip(s.id)
       const qMe = (cs?.quantity_me ?? 0) + (auth?.role === 'owner' ? 1 : 0)
       const qBro = (cs?.quantity_brother ?? 0) + (auth?.role === 'partner' ? 1 : 0)
-      supabase.from('collection_stickers').upsert(
-        { collection_id: auth!.collectionId, sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro },
-        { onConflict: 'collection_id,sticker_id' }
-      )
+      const { error } = await supabase
+        .from('collection_stickers')
+        .upsert(
+          { collection_id: auth!.collectionId, sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro },
+          { onConflict: 'collection_id,sticker_id' }
+        )
+      if (error) { showToast('Erro ao salvar. Tente novamente.'); return }
+      setCsMap((prev) => new Map(prev).set(s.id, { sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro }))
+      dismissChip(s.id)
       showToast(`${s.id} registrada para ${profileName}`)
     } else {
       const qMe = Math.max(0, (cs?.quantity_me ?? 0) - (auth?.role === 'owner' ? 1 : 0))
       const qBro = Math.max(0, (cs?.quantity_brother ?? 0) - (auth?.role === 'partner' ? 1 : 0))
+      const { error } = await supabase
+        .from('collection_stickers')
+        .upsert(
+          { collection_id: auth!.collectionId, sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro },
+          { onConflict: 'collection_id,sticker_id' }
+        )
+      if (error) { showToast('Erro ao salvar. Tente novamente.'); return }
       const { extrasMe, extrasBro } = calcExtras(qMe, qBro)
       const noExtrasLeft = auth?.role === 'owner' ? extrasMe === 0 : extrasBro === 0
-
       setCsMap((prev) => new Map(prev).set(s.id, { sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro }))
-
       if (noExtrasLeft) dismissChip(s.id)
-
-      supabase.from('collection_stickers').upsert(
-        { collection_id: auth!.collectionId, sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro },
-        { onConflict: 'collection_id,sticker_id' }
-      )
       showToast(`${s.id} removida das repetidas`)
     }
   }
