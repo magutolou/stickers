@@ -105,22 +105,22 @@ export default function Section() {
 
   return (
     <div>
-      <div className="bg-green-800 dark:bg-[#146C43] px-4 pt-10 pb-4">
-        <button onClick={() => navigate('/album')} className="text-green-300 dark:text-[#F3F7F4]/70 text-sm mb-2">
+      <div className="bg-green-800 px-4 pt-10 pb-4">
+        <button onClick={() => navigate('/album')} className="text-green-300 text-sm mb-2">
           ← Álbum
         </button>
         <div className="flex items-center gap-3">
           <span className="text-3xl">{FLAG_EMOJI[teamId || ''] || '🏳️'}</span>
           <div>
-            <h1 className="text-white dark:text-[#F3F7F4] text-xl font-bold">{team?.name || teamId}</h1>
-            <p className="text-green-300 dark:text-[#F3F7F4]/70 text-sm">
+            <h1 className="text-white text-xl font-bold">{team?.name || teamId}</h1>
+            <p className="text-green-300 text-sm">
               {teamId === 'FWC' ? 'Especiais' : `Grupo ${team?.group}`} · {collected}/{stickers.length}
             </p>
           </div>
         </div>
-        <div className="w-full bg-green-900 dark:bg-[#244236] rounded-full h-1.5 mt-3">
+        <div className="w-full bg-green-900 rounded-full h-1.5 mt-3">
           <div
-            className="bg-white dark:bg-[#CFEFD9] h-1.5 rounded-full transition-all"
+            className="bg-white h-1.5 rounded-full transition-all"
             style={{ width: `${stickers.length > 0 ? (collected / stickers.length) * 100 : 0}%` }}
           />
         </div>
@@ -133,8 +133,8 @@ export default function Section() {
             onClick={() => setFilter(f.key)}
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium ${
               filter === f.key
-                ? 'bg-green-700 dark:bg-[#1E7A48] text-white dark:text-[#F4FFF7]'
-                : 'bg-[#E8ECF2] dark:bg-[#232830] text-[#536273] dark:text-[#B1B7C0]'
+                ? 'bg-green-700 text-white'
+                : 'bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-[#aaa]'
             }`}
           >
             {f.label}
@@ -144,7 +144,7 @@ export default function Section() {
 
       <div className="px-4 pb-6">
         {filtered.length === 0 ? (
-          <p className="text-center text-gray-400 dark:text-[#707887] py-8">Nenhuma figurinha neste filtro</p>
+          <p className="text-center text-gray-400 dark:text-[#555] py-8">Nenhuma figurinha neste filtro</p>
         ) : (
           <div className="grid grid-cols-3 gap-2">
             {filtered.map((s) => (

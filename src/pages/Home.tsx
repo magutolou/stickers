@@ -71,29 +71,29 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#171B21] mx-4 -mt-3 rounded-2xl shadow p-4 flex divide-x divide-gray-100 dark:divide-[#2A313B]">
+      <div className="bg-white dark:bg-[#1e1e1e] mx-4 -mt-3 rounded-2xl shadow p-4 flex divide-x divide-gray-100 dark:divide-[#2a2a2a]">
         <div className="flex-1 text-center">
-          <p className="text-2xl font-bold text-gray-800 dark:text-[#E6EAF0]">{stats.collected}</p>
-          <p className="text-xs text-gray-500 dark:text-[#A1AAB6] mt-0.5">Coletadas</p>
+          <p className="text-2xl font-bold text-gray-800 dark:text-[#f0f0f0]">{stats.collected}</p>
+          <p className="text-xs text-gray-500 dark:text-[#aaa] mt-0.5">Coletadas</p>
         </div>
         <div className="flex-1 text-center">
           <p className="text-2xl font-bold text-red-500">{stats.duplicates}</p>
-          <p className="text-xs text-gray-500 dark:text-[#A1AAB6] mt-0.5">Repetidas</p>
+          <p className="text-xs text-gray-500 dark:text-[#aaa] mt-0.5">Repetidas</p>
         </div>
         <div className="flex-1 text-center">
-          <p className="text-2xl font-bold text-gray-400 dark:text-[#707887]">{stats.missing}</p>
-          <p className="text-xs text-gray-500 dark:text-[#A1AAB6] mt-0.5">Faltando</p>
+          <p className="text-2xl font-bold text-gray-400 dark:text-[#555]">{stats.missing}</p>
+          <p className="text-xs text-gray-500 dark:text-[#aaa] mt-0.5">Faltando</p>
         </div>
       </div>
 
       <div className="px-4 mt-5">
-        <div className="w-full bg-gray-200 dark:bg-[#244236] rounded-full h-2">
+        <div className="w-full bg-gray-200 dark:bg-[#2a2a2a] rounded-full h-2">
           <div
-            className="bg-green-600 dark:bg-[#CFEFD9] h-2 rounded-full transition-all"
+            className="bg-green-600 h-2 rounded-full transition-all"
             style={{ width: `${(stats.collected / TOTAL_STICKERS) * 100}%` }}
           />
         </div>
-        <p className="text-xs text-gray-500 dark:text-[#A1AAB6] mt-1 text-right">
+        <p className="text-xs text-gray-500 dark:text-[#aaa] mt-1 text-right">
           {stats.collected} / {TOTAL_STICKERS} ({Math.round((stats.collected / TOTAL_STICKERS) * 100)}%)
         </p>
       </div>
@@ -112,14 +112,14 @@ export default function Home() {
         </button>
         <button
           onClick={() => navigate('/checklist')}
-          className="w-full bg-white dark:bg-[#171B21] border border-gray-200 dark:border-[#2A313B] rounded-2xl p-4 flex items-center gap-4 shadow-sm"
+          className="w-full bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-2xl p-4 flex items-center gap-4 shadow-sm"
         >
           <span className="text-3xl">☑️</span>
           <div className="text-left">
-            <p className="font-semibold text-gray-800 dark:text-[#E6EAF0]">Checklist</p>
-            <p className="text-gray-500 dark:text-[#A1AAB6] text-sm">{stats.duplicates} figurinhas repetidas</p>
+            <p className="font-semibold text-gray-800 dark:text-[#f0f0f0]">Checklist</p>
+            <p className="text-gray-500 dark:text-[#aaa] text-sm">{stats.duplicates} figurinhas repetidas</p>
           </div>
-          <span className="ml-auto text-gray-400 dark:text-[#707887] text-xl">›</span>
+          <span className="ml-auto text-gray-400 dark:text-[#555] text-xl">›</span>
         </button>
       </div>
     </div>

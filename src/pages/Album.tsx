@@ -196,7 +196,7 @@ export default function Album() {
 
   return (
     <div className="pb-4">
-      <div className="bg-green-800 dark:bg-[#146C43] px-4 pt-10 pb-4">
+      <div className="bg-green-800 px-4 pt-10 pb-4">
         {isSearchOpen ? (
           <div
             className="flex items-center gap-2"
@@ -223,7 +223,7 @@ export default function Album() {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-white text-xl font-bold">Álbum</h1>
-              <p className="text-green-300 dark:text-[#F3F7F4]/70 text-sm">Copa do Mundo 2026</p>
+              <p className="text-green-300 text-sm">Copa do Mundo 2026</p>
             </div>
             <button onClick={openSearch} className="text-white/70 hover:text-white mt-1">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -236,7 +236,7 @@ export default function Album() {
 
       <div className="px-4 mt-4 space-y-5">
         {isSearchActive && (
-          <p className="text-xs text-gray-500 dark:text-[#A1AAB6] text-center -mt-2">
+          <p className="text-xs text-gray-500 dark:text-[#aaa] text-center -mt-2">
             {totalFound === 0
               ? 'Nenhuma figurinha encontrada'
               : totalFound === 1
@@ -247,7 +247,7 @@ export default function Album() {
 
         {fwcTeams && (
           <div>
-            <p className="text-xs font-bold text-gray-500 dark:text-[#A1AAB6] uppercase tracking-wide mb-2">Especiais FWC</p>
+            <p className="text-xs font-bold text-gray-500 dark:text-[#aaa] uppercase tracking-wide mb-2">Especiais FWC</p>
             <div className="grid grid-cols-2 gap-2">
               {fwcTeams.map((team) => {
                 const pct = team.total > 0 ? (team.collected / team.total) * 100 : 0
@@ -255,17 +255,17 @@ export default function Album() {
                   <button
                     key={team.id}
                     onClick={() => navigate(`/album/${team.id}`)}
-                    className="bg-white dark:bg-[#171B21] border border-gray-200 dark:border-[#2A313B] rounded-2xl p-3 flex items-center gap-3 shadow-sm text-left"
+                    className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-2xl p-3 flex items-center gap-3 shadow-sm text-left"
                   >
                     <span className="text-2xl">{FLAG_EMOJI[team.id] || '🏳️'}</span>
                     <div className="flex-1 min-w-0">
-                      <p className={`font-semibold text-sm truncate ${isSearchActive ? 'text-[#7a5200] dark:text-[#f0c040]' : 'text-gray-900 dark:text-[#E6EAF0]'}`}>
+                      <p className={`font-semibold text-sm truncate ${isSearchActive ? 'text-[#7a5200] dark:text-[#f0c040]' : 'text-gray-900 dark:text-[#f0f0f0]'}`}>
                         {team.name}
                       </p>
-                      <div className="w-full bg-gray-200 dark:bg-[#244236] rounded-full h-1.5 mt-1">
-                        <div className="bg-green-500 dark:bg-[#CFEFD9] h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="w-full bg-gray-200 dark:bg-[#2a2a2a] rounded-full h-1.5 mt-1">
+                        <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-[#A1AAB6] mt-0.5">{team.collected}/{team.total}</p>
+                      <p className="text-xs text-gray-500 dark:text-[#aaa] mt-0.5">{team.collected}/{team.total}</p>
                     </div>
                   </button>
                 )
@@ -277,30 +277,30 @@ export default function Album() {
         {regularGroups.length > 0 && (
           <div>
             {!isSearchActive && (
-              <p className="text-xs font-bold text-gray-500 dark:text-[#A1AAB6] uppercase tracking-wide mb-2">Grupos</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-[#aaa] uppercase tracking-wide mb-2">Grupos</p>
             )}
             <div className="space-y-2">
               {regularGroups.map(([group, list]) => {
                 const isOpen = isGroupOpen(group)
                 return (
-                  <div key={group} className="bg-white dark:bg-[#171B21] border border-gray-200 dark:border-[#2A313B] rounded-2xl shadow-sm overflow-hidden">
+                  <div key={group} className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-2xl shadow-sm overflow-hidden">
                     <button
                       onClick={() => toggleGroup(group)}
                       className="w-full grid items-center px-4 py-3"
                       style={{ gridTemplateColumns: 'auto 1fr auto' }}
                     >
-                      <span className="font-semibold text-gray-800 dark:text-[#E6EAF0] text-sm">Grupo {group}</span>
+                      <span className="font-semibold text-gray-800 dark:text-[#f0f0f0] text-sm">Grupo {group}</span>
                       <div className="flex items-center justify-center gap-1.5">
                         {list.map((team) => (
                           <FlagIcon key={team.id} teamId={team.id} />
                         ))}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 dark:text-[#707887]">
+                        <span className="text-xs text-gray-400 dark:text-[#555]">
                           {list.reduce((s, t) => s + t.collected, 0)}/{list.reduce((s, t) => s + t.total, 0)}
                         </span>
                         {!isSearchActive && (
-                          <span className="text-gray-400 dark:text-[#707887]">
+                          <span className="text-gray-400 dark:text-[#555]">
                             <Chevron open={isOpen} />
                           </span>
                         )}
@@ -308,24 +308,24 @@ export default function Album() {
                     </button>
 
                     {isOpen && (
-                      <div className="px-3 pb-3 grid grid-cols-2 gap-2 border-t border-gray-100 dark:border-[#2A313B]">
+                      <div className="px-3 pb-3 grid grid-cols-2 gap-2 border-t border-gray-100 dark:border-[#2a2a2a]">
                         {list.map((team) => {
                           const pct = team.total > 0 ? (team.collected / team.total) * 100 : 0
                           return (
                             <button
                               key={team.id}
                               onClick={() => navigate(`/album/${team.id}`)}
-                              className="bg-gray-50 dark:bg-[#1D232B] border border-gray-200 dark:border-[#2A313B] rounded-xl p-3 flex items-center gap-3 text-left mt-2"
+                              className="bg-gray-50 dark:bg-[#2a2a2a] border border-gray-200 dark:border-[#333] rounded-xl p-3 flex items-center gap-3 text-left mt-2"
                             >
                               <FlagIcon teamId={team.id} />
                               <div className="flex-1 min-w-0">
-                                <p className={`font-semibold text-sm truncate ${isSearchActive ? 'text-[#7a5200] dark:text-[#f0c040]' : 'text-gray-900 dark:text-[#E6EAF0]'}`}>
+                                <p className={`font-semibold text-sm truncate ${isSearchActive ? 'text-[#7a5200] dark:text-[#f0c040]' : 'text-gray-900 dark:text-[#f0f0f0]'}`}>
                                   {team.name}
                                 </p>
-                                <div className="w-full bg-gray-200 dark:bg-[#244236] rounded-full h-1.5 mt-1">
-                                  <div className="bg-green-500 dark:bg-[#CFEFD9] h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                                <div className="w-full bg-gray-200 dark:bg-[#2a2a2a] rounded-full h-1.5 mt-1">
+                                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
                                 </div>
-                                <p className="text-xs text-gray-500 dark:text-[#A1AAB6] mt-0.5">{team.collected}/{team.total}</p>
+                                <p className="text-xs text-gray-500 dark:text-[#aaa] mt-0.5">{team.collected}/{team.total}</p>
                               </div>
                             </button>
                           )
@@ -340,7 +340,7 @@ export default function Album() {
         )}
 
         {isSearchActive && totalFound === 0 && (
-          <p className="text-center text-gray-400 dark:text-[#707887] py-12">Nenhuma figurinha encontrada</p>
+          <p className="text-center text-gray-400 dark:text-[#555] py-12">Nenhuma figurinha encontrada</p>
         )}
       </div>
     </div>
