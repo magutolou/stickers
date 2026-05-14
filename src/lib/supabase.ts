@@ -37,6 +37,17 @@ export type Database = {
           quantity_brother: number
         }
       }
+      sticker_history: {
+        Row: {
+          id: string
+          collection_id: string
+          sticker_code: string
+          sticker_name: string
+          action: 'added' | 'removed'
+          actor: 'me' | 'brother'
+          created_at: string
+        }
+      }
     }
   }
 }

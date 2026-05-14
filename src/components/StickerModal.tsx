@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
+import { insertHistory } from '../lib/history'
 import type { StickerWithStatus } from '../lib/types'
 
 interface Props {
@@ -31,15 +32,33 @@ export default function StickerModal({ sticker, onClose, onUpdate }: Props) {
   }
 
   async function changeQMe(delta: number) {
-    const next = Math.max(0, qMe + delta)
+    const prev = qMe
+    const next = Math.max(0, prev + delta)
+    if (next === prev) return
     setQMe(next)
     await save(next, qBro)
+    if (auth) insertHistory({
+      collectionId: auth.collectionId,
+      stickerCode: sticker.id,
+      stickerName: sticker.player_name,
+      action: next > prev ? 'added' : 'removed',
+      actor: 'me',
+    })
   }
 
   async function changeQBro(delta: number) {
-    const next = Math.max(0, qBro + delta)
+    const prev = qBro
+    const next = Math.max(0, prev + delta)
+    if (next === prev) return
     setQBro(next)
     await save(qMe, next)
+    if (auth) insertHistory({
+      collectionId: auth.collectionId,
+      stickerCode: sticker.id,
+      stickerName: sticker.player_name,
+      action: next > prev ? 'added' : 'removed',
+      actor: 'brother',
+    })
   }
 
   return (

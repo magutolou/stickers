@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
+import HistoryDrawer from '../components/HistoryDrawer'
 import type { Team } from '../lib/types'
 
 interface TeamWithProgress extends Team {
@@ -71,6 +72,7 @@ export default function Album() {
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -225,11 +227,16 @@ export default function Album() {
               <h1 className="text-white text-xl font-bold">Álbum</h1>
               <p className="text-green-300 text-sm">Copa do Mundo 2026</p>
             </div>
-            <button onClick={openSearch} className="text-white/70 hover:text-white mt-1">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-3 mt-1">
+              <button onClick={() => setHistoryOpen(true)} className="text-white/70 hover:text-white">
+                <i className="ti ti-clock text-xl leading-none" />
+              </button>
+              <button onClick={openSearch} className="text-white/70 hover:text-white">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -343,6 +350,8 @@ export default function Album() {
           <p className="text-center text-gray-400 dark:text-[#555] py-12">Nenhuma figurinha encontrada</p>
         )}
       </div>
+
+      <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} />
     </div>
   )
 }

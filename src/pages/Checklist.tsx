@@ -2,11 +2,14 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
 import { calcExtras } from '../lib/extras'
+import { insertHistory } from '../lib/history'
+import HistoryDrawer from '../components/HistoryDrawer'
 
 type Tab = 'missing' | 'duplicates'
 
 interface StickerRow {
   id: string
+  player_name: string
   team_id: string
   team_name: string
   team_group: string
@@ -73,6 +76,7 @@ export default function Checklist() {
   const [teamsByGroup, setTeamsByGroup] = useState<Record<string, string[]>>({})
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [fadingOut, setFadingOut] = useState<Set<string>>(new Set())
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
@@ -86,7 +90,7 @@ export default function Checklist() {
     if (!auth) return
     async function load() {
       const [{ data: sData }, { data: csData }, { data: tData }] = await Promise.all([
-        supabase.from('stickers').select('id, team_id, teams(name, group)'),
+        supabase.from('stickers').select('id, player_name, team_id, teams(name, group)'),
         supabase
           .from('collection_stickers')
           .select('sticker_id, quantity_me, quantity_brother')
@@ -98,6 +102,7 @@ export default function Checklist() {
         setAllStickers(
           (sData as any[]).map((s) => ({
             id: s.id,
+            player_name: s.player_name ?? '',
             team_id: s.team_id,
             team_name: s.teams?.name ?? '',
             team_group: s.teams?.group ?? 'FWC',
@@ -265,6 +270,13 @@ export default function Checklist() {
         )
       if (error) { showToast('Erro ao salvar. Tente novamente.'); return }
       setCsMap((prev) => new Map(prev).set(s.id, { sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro }))
+      insertHistory({
+        collectionId: auth!.collectionId,
+        stickerCode: s.id,
+        stickerName: s.player_name,
+        action: 'added',
+        actor: auth?.role === 'owner' ? 'me' : 'brother',
+      })
       dismissChip(s.id)
       showToast(`${s.id} registrada para ${profileName}`)
     } else {
@@ -280,6 +292,13 @@ export default function Checklist() {
       const { extrasMe, extrasBro } = calcExtras(qMe, qBro)
       const noExtrasLeft = auth?.role === 'owner' ? extrasMe === 0 : extrasBro === 0
       setCsMap((prev) => new Map(prev).set(s.id, { sticker_id: s.id, quantity_me: qMe, quantity_brother: qBro }))
+      insertHistory({
+        collectionId: auth!.collectionId,
+        stickerCode: s.id,
+        stickerName: s.player_name,
+        action: 'removed',
+        actor: auth?.role === 'owner' ? 'me' : 'brother',
+      })
       if (noExtrasLeft) dismissChip(s.id)
       showToast(`${s.id} removida das repetidas`)
     }
@@ -317,6 +336,9 @@ export default function Checklist() {
               <p className="text-green-300 text-sm">Toque para registrar figurinha obtida</p>
             </div>
             <div className="flex items-center gap-2 mt-1">
+              <button onClick={() => setHistoryOpen(true)} className="text-white/70 hover:text-white">
+                <i className="ti ti-clock text-xl leading-none" />
+              </button>
               <button onClick={openSearch} className="text-white/70 hover:text-white">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -475,6 +497,8 @@ export default function Checklist() {
           {toast}
         </div>
       )}
+
+      <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} />
     </div>
   )
 }

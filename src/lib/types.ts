@@ -23,3 +23,13 @@ export interface CollectionSticker {
 export type StickerWithStatus = Sticker & Partial<CollectionSticker>
 
 export type StickerFilter = 'all' | 'mine' | 'brother' | 'duplicates' | 'missing'
+
+export interface StickerHistory {
+  id: string
+  collection_id: string
+  sticker_code: string
+  sticker_name: string
+  action: 'added' | 'removed'
+  actor: 'me' | 'brother'
+  created_at: string
+}

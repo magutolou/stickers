@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
 import { calcExtras } from '../lib/extras'
+import HistoryDrawer from '../components/HistoryDrawer'
 
 const TOTAL_STICKERS = 980
 
@@ -16,6 +17,7 @@ export default function Home() {
   const { auth } = useAuth()
   const navigate = useNavigate()
   const [stats, setStats] = useState<Stats>({ collected: 0, duplicates: 0, missing: TOTAL_STICKERS })
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   useEffect(() => {
     if (!auth) return
@@ -121,7 +123,20 @@ export default function Home() {
           </div>
           <span className="ml-auto text-gray-400 dark:text-[#555] text-xl">›</span>
         </button>
+        <button
+          onClick={() => setHistoryOpen(true)}
+          className="w-full bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#333] rounded-2xl p-4 flex items-center gap-4 shadow-sm"
+        >
+          <span className="text-3xl">🕐</span>
+          <div className="text-left">
+            <p className="font-semibold text-gray-800 dark:text-[#f0f0f0]">Histórico</p>
+            <p className="text-gray-500 dark:text-[#aaa] text-sm">Últimas alterações</p>
+          </div>
+          <span className="ml-auto text-gray-400 dark:text-[#555] text-xl">›</span>
+        </button>
       </div>
+
+      <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} />
     </div>
   )
 }
