@@ -228,10 +228,10 @@ export default function Album() {
               <p className="text-green-300 text-sm">Copa do Mundo 2026</p>
             </div>
             <div className="flex items-center gap-3 mt-1">
-              <button onClick={() => setHistoryOpen(true)} className="text-white/70 hover:text-white">
-                <i className="ti ti-clock text-xl leading-none" />
+              <button onClick={() => setHistoryOpen(true)} className="text-white/70 hover:text-white flex items-center">
+                <i className="ti ti-clock text-xl leading-none block" />
               </button>
-              <button onClick={openSearch} className="text-white/70 hover:text-white">
+              <button onClick={openSearch} className="text-white/70 hover:text-white flex items-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
