@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createWorker } from 'tesseract.js'
+import { createWorker, PSM } from 'tesseract.js'
 import type { Worker } from 'tesseract.js'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../App'
@@ -70,7 +70,7 @@ export default function Camera() {
     createWorker('eng').then(async worker => {
       if (!active) { worker.terminate(); return }
       await worker.setParameters({
-        tessedit_pageseg_mode: '7',
+        tessedit_pageseg_mode: PSM.SINGLE_LINE,
         tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789',
       })
       workerRef.current = worker
