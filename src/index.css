@@ -8,13 +8,13 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
-  background-color: #f8f8f6;
+  background-color: #F1F3F6;
   color: #1a1a1a;
 }
 
 .dark body {
-  background-color: #111111;
-  color: #f0f0f0;
+  background-color: #111418;
+  color: #E6EAF0;
 }
 
 #root {
