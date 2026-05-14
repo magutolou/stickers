@@ -67,8 +67,12 @@ export default function Camera() {
     }
 
     let active = true
-    createWorker('eng').then(worker => {
+    createWorker('eng').then(async worker => {
       if (!active) { worker.terminate(); return }
+      await worker.setParameters({
+        tessedit_pageseg_mode: '7',
+        tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789',
+      })
       workerRef.current = worker
       setWorkerReady(true)
     })
@@ -118,20 +122,42 @@ export default function Camera() {
 
     const video = videoRef.current
     const canvas = canvasRef.current
-    canvas.width = video.videoWidth || 640
-    canvas.height = video.videoHeight || 480
+    const fullW = video.videoWidth || 640
+    const fullH = video.videoHeight || 480
+    canvas.width = fullW
+    canvas.height = fullH
     canvas.getContext('2d')!.drawImage(video, 0, 0)
 
+    // Recorta os 35% direitos × 25% superiores (onde fica o badge do código)
+    const cropW = Math.floor(fullW * 0.35)
+    const cropH = Math.floor(fullH * 0.25)
+    const cropX = fullW - cropW
+    const crop = document.createElement('canvas')
+    crop.width = cropW
+    crop.height = cropH
+    const cropCtx = crop.getContext('2d')!
+    cropCtx.drawImage(canvas, cropX, 0, cropW, cropH, 0, 0, cropW, cropH)
+
+    // Inverte cores: texto branco sobre fundo escuro → texto escuro sobre fundo claro
+    const imageData = cropCtx.getImageData(0, 0, cropW, cropH)
+    const d = imageData.data
+    for (let i = 0; i < d.length; i += 4) {
+      d[i] = 255 - d[i]
+      d[i + 1] = 255 - d[i + 1]
+      d[i + 2] = 255 - d[i + 2]
+    }
+    cropCtx.putImageData(imageData, 0, 0)
+
     try {
-      const { data: { text } } = await workerRef.current.recognize(canvas)
-      const match =
-        text.match(/[A-Z]{2,3}-\d{1,2}/) ??
-        text.replace(/\s/g, '').match(/[A-Z]{2,3}-\d{1,2}/)
+      const { data: { text } } = await workerRef.current.recognize(crop)
+      // Padrão real: "AUT 20", "SEN 13" (espaço, não hífen)
+      const match = text.match(/[A-Z]{2,3}\s\d{1,2}/)
 
       if (!match) {
         showToast('Nenhum código encontrado, tente novamente')
       } else {
-        const code = match[0]
+        // Normaliza "AUT 20" → "AUT-20" para buscar no catálogo
+        const code = match[0].replace(/\s/, '-')
         if (!catalog.has(code)) {
           showToast(`Código ${code} não está no catálogo`)
         } else if (session.some(s => s.id === code)) {
